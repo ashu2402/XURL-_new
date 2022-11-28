@@ -1,10 +1,13 @@
 package com.crio.shorturl;
 
-public class XUrlMain {
+import java.util.HashMap;
+
+public class XUrlMain{
 
   public static void main(String[] args) {
 
-    XUrl xUrl = new XUrlImpl();
+    XUrl xUrl = new XUrlImpl(null);
+
 
     // Test the Short Url Implementation by registering long URLs and looking up short URLs
     
@@ -19,6 +22,7 @@ public class XUrlMain {
     System.out.println(url2);
     System.out.println(url3);
     System.out.println(url4);
+
 
     // Update new URL mapping to a custom short URL
     String url5 = xUrl.registerNewUrl("http://abc5.com", "http://short.url/test1");
@@ -43,7 +47,7 @@ public class XUrlMain {
     assert(xUrl.getHitCount("http://abcn.com").equals(0));
 
     // From the short URL url1, remove the common section (http://short.url/) and remove any non alphanumeric character
-    String choppedUrl = url1.replace("http://short.url/", "").replaceAll("[^A-Za-z0-9]", "");
+    String choppedUrl = url1.replace("http://short.url/" ,"");//.replaceAll("[^A-Za-z0-9]", "");
     System.out.println(choppedUrl);
     // The result should have only alphanumeric characters and be 9 characters long
     assert (choppedUrl.length() == 9);
