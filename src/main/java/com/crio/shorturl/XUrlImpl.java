@@ -31,7 +31,7 @@ public class XUrlImpl implements XUrl{
         StringBuilder sb = new StringBuilder("");
         
         for(int i=0; i<9; i++){
-            int index = random.nextInt(alphaNumericpool.length());
+            int index = random.nextInt(alphaNumericpool.length()-1);
             char c = alphaNumericpool.charAt(index);
             sb.append(c);
         }
