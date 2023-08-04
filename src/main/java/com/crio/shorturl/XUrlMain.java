@@ -1,22 +1,28 @@
 package com.crio.shorturl;
 
-import java.util.HashMap;
+import java.time.LocalDate;
 
 public class XUrlMain{
 
   public static void main(String[] args) {
 
-    XUrl xUrl = new XUrlImpl(null);
-
+    XUrlImpl xUrl = new XUrlImpl(null);
 
     // Test the Short Url Implementation by registering long URLs and looking up short URLs
-    
+
     // Register long URLs and get the corresponding short URLs as return values
     String url = xUrl.registerNewUrl("http://abc.com");
     String url1 = xUrl.registerNewUrl("http://abc1.com");
     String url2 = xUrl.registerNewUrl("http://abc2.com");
     String url3 = xUrl.registerNewUrl("http://abc3.com");
     String url4 = xUrl.registerNewUrl("http://abc2.com");  // url4 should be the same as url2
+    
+    System.out.println(XUrlImpl.url_hit_time_stamp.size());
+    //System.out.println(XUrlImpl.url_hit_time_stamp.get("http://abc.com"));
+    XUrlImpl.url_hit_time_stamp.put("http://google.com",LocalDate.parse("2023-03-23"));
+    System.out.println(XUrlImpl.url_hit_time_stamp.get("http://google.com"));
+    System.out.println(XUrlImpl.url_hit_time_stamp.size());
+
     System.out.println(url);
     System.out.println(url1);
     System.out.println(url2);
@@ -34,6 +40,13 @@ public class XUrlMain{
     System.out.println(url5);
     System.out.println(url6);
     System.out.println(urlNull);
+
+
+    System.out.println(XUrlImpl.url_hit_time_stamp.size());
+    xUrl.delete_expired_urls();
+    //After using the delete_expired_urls we will check whether that outdated url(not used in last one month) is deleted or not 
+    System.out.println(XUrlImpl.url_hit_time_stamp.size());
+
 
     // Test out longURL lookup based on the shortURL input
     assert(xUrl.getUrl(url).equals("http://abc.com"));
@@ -57,4 +70,5 @@ public class XUrlMain{
     assert(xUrl.getUrl(url6) == null);
   }
 }
+
 
