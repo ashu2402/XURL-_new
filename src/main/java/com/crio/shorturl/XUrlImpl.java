@@ -1,7 +1,10 @@
 //package com.crio.xurl;
 package com.crio.shorturl;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
@@ -23,8 +26,38 @@ public class XUrlImpl implements XUrl{
     Map<String, Integer> longUrlHitCount = new HashMap<>();
 
 
+    Map<String,LocalDate> url_hit_time_stamp = new HashMap<>();
+
+
+    //this function could be run after every 24hrs or depending as per requirement.
+    private void delete_expired_urls(){
+        LocalDate current_time_stamp = LocalDate.now();
+
+        Iterator<Map.Entry<String, LocalDate>>iterator = url_hit_time_stamp.entrySet().iterator();
+
+        //url_hit_time_stamp.entrySet().removeIf(entry->ChronoUnit.MONTHS.between(entry.getValue(), current_time_stamp)>=1);
+
+        // Iterate over the HashMap
+        while (iterator.hasNext()) {
+            // Get the entry at this iteration
+            Map.Entry<String, LocalDate> entry = iterator.next();
+            // Check if this key is the required key
+            //Duration of expiry here is set to 1 month or above
+            if(ChronoUnit.MONTHS.between(entry.getValue(), current_time_stamp)>=1)
+            {
+                delete(entry.getKey());
+                // Remove this entry from HashMap
+                iterator.remove();
+            }
+        }
+
+    }
+
+
+
+
     //In this method we will firstly generate a short url for corresponding long url and then save the mapping into our 
-    //hashmap 
+    //hashmap ...here we are returning the short url which is generated.
     private final String generateShortUrl(){
         String alphaNumericpool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
@@ -32,11 +65,9 @@ public class XUrlImpl implements XUrl{
         
         for(int i=0; i<9; i++){
             int index = random.nextInt(alphaNumericpool.length()-1);
-            char c = alphaNumericpool.charAt(index);
-            sb.append(c);
+            sb.append(alphaNumericpool.charAt(index));
         }
-        String shortUrlgenerated = "http://short.url/" + sb.toString();
-        return shortUrlgenerated;
+        return "http://short.url/"+sb.toString();
     }
 
 
@@ -47,16 +78,19 @@ public class XUrlImpl implements XUrl{
             return urlHashMap.get(longUrl);
         }
 
-        else{
-            if(!(urlHashMap.containsKey(longUrl))){
+        else{       //longurl entry not present in urlhashmap
                 String shortUrl = generateShortUrl();
                 urlHashMap.put(longUrl, shortUrl);
                 inverseMap.put(shortUrl, longUrl);
-            }
         }
+
+        //try updating the time_stamp as there was a lookup to register a new url
+        url_hit_time_stamp.put(longUrl, LocalDate.now());
+
 
         return urlHashMap.get(longUrl);
     }
+
 
 
     @Override
@@ -64,12 +98,18 @@ public class XUrlImpl implements XUrl{
         if(urlHashMap.containsValue(shortUrl))
             return null;
 
-        else
+        else{
             urlHashMap.put(longUrl, shortUrl);
             inverseMap.put(shortUrl, longUrl);
 
+            //try updating the time_stamp as there was a lookup to register a new url
+            url_hit_time_stamp.put(longUrl, LocalDate.now());
+        }
+
         return urlHashMap.get(longUrl);
     }
+
+
 
     @Override
     public String getUrl(String shortUrl) {
@@ -78,13 +118,17 @@ public class XUrlImpl implements XUrl{
         String str = inverseMap.get(shortUrl);
         longUrlHitCount.put(str, longUrlHitCount.getOrDefault(str,0)+1);
 
+        //try updating the time_stamp as there was a lookup to register a new url
+        url_hit_time_stamp.put(str, LocalDate.now());
+
+
         if(!(inverseMap.containsKey(shortUrl)))
             return null;
-
         else{
             return inverseMap.get(shortUrl);
         }
     }
+
 
 
     @Override
@@ -92,10 +136,10 @@ public class XUrlImpl implements XUrl{
 
         if(longUrlHitCount.containsKey(longUrl))
             return longUrlHitCount.get(longUrl);
-
         else
             return 0;
     }
+
 
 
     @Override
